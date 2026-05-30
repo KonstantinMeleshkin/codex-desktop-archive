@@ -1,0 +1,102 @@
+{
+  "artifacts": [
+    {
+      "app": {
+        "app_count": 1,
+        "build": "3390",
+        "bundle_id": "com.openai.codex",
+        "executable": "Codex",
+        "name": "Codex",
+        "version": "26.527.31326"
+      },
+      "classification": "full-installer",
+      "dmg": {
+        "external_payloads": [],
+        "top_level_entries": [
+          ".DS_Store",
+          ".VolumeIcon.icns",
+          ".background",
+          "Applications",
+          "Codex.app"
+        ],
+        "unexpected_top_level_entries": []
+      },
+      "filename": "Codex-Desktop-26.527.31326-macos.dmg",
+      "platform": "macos",
+      "sha256": "b26865ed3ab0498a8b8a06fd9417d2db038a2c0f28508f901e39ceccd4c26529",
+      "size": 400814855,
+      "source": {
+        "content_type": "application/x-apple-diskimage",
+        "effective_url": "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg",
+        "headers": {
+          "content-length": "400814855",
+          "content-type": "application/x-apple-diskimage",
+          "date": "Sat, 30 May 2026 08:52:23 GMT",
+          "etag": "0x8DEBDD050B952EA",
+          "last-modified": "Fri, 29 May 2026 22:19:13 GMT",
+          "server": "cloudflare"
+        },
+        "http_status": 200,
+        "platform": "macos",
+        "size_download": 400814855,
+        "status_line": "HTTP/2 200 ",
+        "url": "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg"
+      },
+      "verification": {
+        "checks": {
+          "codesign_verify": true,
+          "expected_bundle_id": true,
+          "expected_executable": true,
+          "expected_name": true,
+          "expected_origin": true,
+          "expected_single_app": true,
+          "expected_team_id": true,
+          "expected_volume_top_level": true,
+          "hdiutil_verify": true,
+          "no_external_payloads": true,
+          "spctl_assessment": true,
+          "stapler_validate": true
+        },
+        "expected_bundle_id": "com.openai.codex",
+        "expected_executable": "Codex",
+        "expected_name": "Codex",
+        "expected_origin": "Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)",
+        "expected_team_id": "2DC432GLL2",
+        "logs": {
+          "codesign_details": "Executable=/private/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app/Contents/MacOS/Codex\nIdentifier=com.openai.codex\nFormat=app bundle with Mach-O thin (arm64)\nCodeDirectory v=20500 size=892 flags=0x10000(runtime) hashes=17+7 location=embedded\nVersionPlatform=1\nVersionMin=786432\nVersionSDK=1705216\nHash type=sha256 size=32\nCandidateCDHash sha256=1efc1bce58f42d6d9856f61608dd472702dac724\nCandidateCDHashFull sha256=1efc1bce58f42d6d9856f61608dd472702dac724f3ec50f5f58ecdeeb6d750cc\nHash choices=sha256\nCMSDigest=1efc1bce58f42d6d9856f61608dd472702dac724f3ec50f5f58ecdeeb6d750cc\nCMSDigestType=2\nExecutable Segment base=0\nExecutable Segment limit=32768\nExecutable Segment flags=0x1\nPage size=4096\nCDHash=1efc1bce58f42d6d9856f61608dd472702dac724\nSignature size=9046\nAuthority=Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)\nAuthority=Developer ID Certification Authority\nAuthority=Apple Root CA\nTimestamp=May 29, 2026 at 9:38:31\u202fPM\nNotarization Ticket=stapled\nInfo.plist entries=53\nTeamIdentifier=2DC432GLL2\nRuntime Version=26.5.0\nSealed Resources version=2 rules=13 files=1614\nInternal requirements count=1 size=176",
+          "codesign_verify": "--prepared:/private/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app/Contents/Frameworks/Codex Framework.framework/Versions/Current/.\n--validated:/private/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app/Contents/Frameworks/Codex Framework.framework/Versions/Current/.\n--prepared:/private/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app/Contents/Frameworks/Sparkle.framework/Versions/Current/.\n--validated:/private/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app/Contents/Frameworks/Sparkle.framework/Versions/Current/.\n/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app: valid on disk\n/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app: satisfies its Designated Requirement",
+          "hdiutil": "Checksumming Protective Master Boot Record (MBR : 0)\u2026\nProtective Master Boot Record (MBR :: verified   CRC32 $E38B0C7C\nChecksumming GPT Header (Primary GPT Header : 1)\u2026\n GPT Header (Primary GPT Header : 1): verified   CRC32 $810DEFE7\nChecksumming GPT Partition Data (Primary GPT Table : 2)\u2026\nGPT Partition Data (Primary GPT Tabl: verified   CRC32 $64DAEB2F\nChecksumming  (Apple_Free : 3)\u2026\n                    (Apple_Free : 3): verified   CRC32 $00000000\nChecksumming disk image (Apple_HFS : 4)\u2026\n          disk image (Apple_HFS : 4): verified   CRC32 $8BCCD37D\nChecksumming  (Apple_Free : 5)\u2026\n                    (Apple_Free : 5): verified   CRC32 $00000000\nChecksumming GPT Partition Data (Backup GPT Table : 6)\u2026\nGPT Partition Data (Backup GPT Table: verified   CRC32 $64DAEB2F\nChecksumming GPT Header (Backup GPT Header : 7)\u2026\n  GPT Header (Backup GPT Header : 7): verified   CRC32 $13EBA21C\nverified   CRC32 $1F3D377B\nhdiutil: verify: checksum of \"dist/artifacts/Codex.dmg\" is VALID",
+          "spctl": "/var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app: accepted\nsource=Notarized Developer ID\norigin=Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)",
+          "stapler": "Processing: /var/folders/8d/778wjbv96mq1760tv6gk374m0000gn/T/tmp.YKRyp8sm1y/mount/Codex.app\nThe validate action worked!"
+        },
+        "origin": "Developer ID Application: OpenAI OpCo, LLC (2DC432GLL2)",
+        "passed": true,
+        "team_id": "2DC432GLL2"
+      }
+    }
+  ],
+  "captured_at": "2026-05-30T08:53:43Z",
+  "limitations": [
+    "This project is not affiliated with OpenAI.",
+    "Artifacts are archived from official OpenAI-linked download URLs.",
+    "Historical byte identity cannot be proven without an OpenAI-published historical hash.",
+    "This archive supports macOS Codex Desktop only."
+  ],
+  "release": {
+    "evidence_level": "strong",
+    "identity": {
+      "build": "3390",
+      "product": "codex-desktop",
+      "version": "26.527.31326"
+    },
+    "tag": "desktop-v26.527.31326",
+    "title": "Codex Desktop 26.527.31326"
+  },
+  "repository": "KonstantinMeleshkin/codex-desktop-archive",
+  "schema_version": "1.0",
+  "source_page": "https://openai.com/codex/",
+  "workflow": {
+    "commit_sha": "bf8571ac78f14365d02a105b23d5b3fd1644b426",
+    "run_id": "26679698458"
+  }
+}
