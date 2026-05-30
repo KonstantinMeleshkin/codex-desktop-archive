@@ -1,0 +1,197 @@
+name: Capture Codex Desktop
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codex-desktop-capture
+  cancel-in-progress: false
+
+env:
+  MACOS_URL: https://persistent.oaistatic.com/codex-app-prod/Codex.dmg
+
+jobs:
+  validate:
+    name: Validate repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/capture_source.sh
+          bash -n scripts/inspect_macos.sh
+          bash -n scripts/publish_release.sh
+          bash -n scripts/verify_existing_release.sh
+
+      - name: Check Python syntax
+        run: python3 -m py_compile scripts/make_manifest.py scripts/render_release_notes.py scripts/should_release.py scripts/release_guard.py
+
+  capture-macos:
+    name: Capture macOS DMG
+    needs: validate
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Download official macOS artifact
+        run: ./scripts/capture_source.sh macos "$MACOS_URL" artifacts/Codex.dmg out/macos-source.json
+
+      - name: Inspect macOS signature and notarization
+        run: ./scripts/inspect_macos.sh artifacts/Codex.dmg out/macos-inspection.json
+
+      - name: Upload macOS capture
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: capture-macos
+          retention-days: 3
+          path: |
+            artifacts/Codex.dmg
+            out/macos-source.json
+            out/macos-inspection.json
+
+  verify-release:
+    name: Verify release package
+    needs: capture-macos
+    runs-on: macos-latest
+    outputs:
+      should_release: ${{ steps.decision.outputs.should_release }}
+      tag: ${{ steps.decision.outputs.tag }}
+      reason: ${{ steps.decision.outputs.reason }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download captured artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Re-inspect macOS artifact before publication
+        run: ./scripts/inspect_macos.sh dist/artifacts/Codex.dmg out/publish-macos-inspection.json
+
+      - name: Build and validate candidate manifest
+        run: |
+          python3 scripts/make_manifest.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-sha "$GITHUB_SHA" \
+            --macos-artifact dist/artifacts/Codex.dmg \
+            --macos-source dist/out/macos-source.json \
+            --macos-inspection out/publish-macos-inspection.json \
+            --output out/candidate-manifest.json
+
+          python3 scripts/release_guard.py validate-manifest --manifest out/candidate-manifest.json
+
+      - name: Decide whether to release
+        id: decision
+        run: |
+          python3 scripts/should_release.py \
+            --latest manifest/latest.json \
+            --candidate out/candidate-manifest.json \
+            --output out/release-decision.json
+
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          decision = json.loads(Path("out/release-decision.json").read_text(encoding="utf-8"))
+          print(f"should_release={str(decision['should_release']).lower()}")
+          print(f"tag={decision['tag']}")
+          print(f"reason={decision['reason']}")
+          PY
+
+      - name: Verify existing release when capture is unchanged
+        if: steps.decision.outputs.should_release != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/render_release_notes.py \
+            --manifest manifest/latest.json \
+            --output out/latest-release-notes.md
+          ./scripts/verify_existing_release.sh manifest/latest.json out/latest-release-notes.md
+          echo "No release created: ${{ steps.decision.outputs.reason }}. Existing release verified." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare release package
+        if: steps.decision.outputs.should_release == 'true'
+        run: |
+          python3 scripts/render_release_notes.py \
+            --manifest out/candidate-manifest.json \
+            --output out/release-notes.md
+
+          version="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          manifest = json.loads(Path("out/candidate-manifest.json").read_text(encoding="utf-8"))
+          print(manifest["release"]["identity"]["version"])
+          PY
+          )"
+
+          mkdir -p release-package/release-assets
+          cp dist/artifacts/Codex.dmg "release-package/release-assets/Codex-Desktop-${version}-macos.dmg"
+          cp out/candidate-manifest.json release-package/candidate-manifest.json
+          cp out/release-notes.md release-package/release-notes.md
+          python3 scripts/release_guard.py verify-assets \
+            --manifest out/candidate-manifest.json \
+            --asset-dir release-package/release-assets
+
+      - name: Upload release package
+        if: steps.decision.outputs.should_release == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-package
+          retention-days: 3
+          path: release-package
+
+  publish:
+    name: Publish verified release
+    needs: verify-release
+    if: needs.verify-release.outputs.should_release == 'true'
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Download release package
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: release-package
+          path: release-package
+
+      - name: Re-inspect macOS artifact before final publication
+        run: |
+          macos_asset="$(find release-package/release-assets -maxdepth 1 -name 'Codex-Desktop-*-macos.dmg' -print -quit)"
+          ./scripts/inspect_macos.sh "$macos_asset" out/final-publish-macos-inspection.json
+          python3 scripts/release_guard.py verify-local-artifact \
+            --manifest release-package/candidate-manifest.json \
+            --artifact "$macos_asset" \
+            --inspection out/final-publish-macos-inspection.json
+
+      - name: Publish release without overwriting existing assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          macos_asset="$(find release-package/release-assets -maxdepth 1 -name 'Codex-Desktop-*-macos.dmg' -print -quit)"
+          ./scripts/publish_release.sh \
+            release-package/candidate-manifest.json \
+            release-package/release-notes.md \
+            "$macos_asset" \
+            out/final-publish-macos-inspection.json

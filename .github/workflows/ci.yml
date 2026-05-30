@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate scripts and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/capture_source.sh
+          bash -n scripts/inspect_macos.sh
+          bash -n scripts/publish_release.sh
+          bash -n scripts/verify_existing_release.sh
+
+      - name: Check Python syntax
+        run: python3 -m py_compile scripts/make_manifest.py scripts/render_release_notes.py scripts/should_release.py scripts/release_guard.py
